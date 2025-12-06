@@ -60,15 +60,15 @@ exports.handler = async (event, context) => {
             safetySettings: [
                 {
                     category: "HARM_CATEGORY_HARASSMENT",
-                    threshold: "BLOCK_NONE" // Harassment filters ko kam kiya
+                    threshold: "BLOCK_NONE" 
                 },
                 {
                     category: "HARM_CATEGORY_HATE_SPEECH",
-                    threshold: "BLOCK_NONE" // Hate Speech filters ko kam kiya
+                    threshold: "BLOCK_NONE" 
                 },
                 {
                     category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    threshold: "BLOCK_ONLY_HIGH" // Dangerous Content ko sirf High severity par block karo
+                    threshold: "BLOCK_ONLY_HIGH" 
                 }
             ]
         });
@@ -82,7 +82,7 @@ exports.handler = async (event, context) => {
         console.error("Function Error:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'AI service error. Please check Netlify logs for details.' })
+            body: JSON.stringify({ error: 'AI service error. Please check Netlify logs for deployment failures.' })
         };
     }
 };
