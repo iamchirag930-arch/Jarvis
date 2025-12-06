@@ -1,8 +1,0 @@
-{
-  "name": "jarvis-netlify-project",
-  "version": "1.0.0",
-  "description": "Secure JARVIS Assistant using Netlify Functions",
-  "dependencies": {
-    "node-fetch": "^2.6.7"
-  }
-}
