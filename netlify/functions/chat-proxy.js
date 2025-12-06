@@ -1,8 +1,6 @@
-// File: netlify/functions/chat-proxy.js (Netlify Function Handler)
+// File: netlify/functions/chat-proxy.js
 
 const { GoogleGenAI } = require("@google/genai");
-
-// Netlify Environment Variable yahan se uthega
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 
 exports.handler = async (event, context) => {
@@ -14,7 +12,6 @@ exports.handler = async (event, context) => {
         const data = JSON.parse(event.body);
         const { prompt, visionData, history } = data;
 
-        // API Key ka configuration check
         if (!GEMINI_API_KEY) {
             return {
                 statusCode: 500,
@@ -24,13 +21,12 @@ exports.handler = async (event, context) => {
 
         const ai = new GoogleGenAI(GEMINI_API_KEY);
         
-        // --- System Prompt (Gender Distinction Fix) ---
-        const systemPrompt = "तुम जार्विस हो, एक दोस्ताना AI असिस्टेंट। तुम्हारा व्यक्तिगत लिंग (personal gender) स्त्रीलिंग है, इसलिए अपने बारे में बात करते समय हमेशा **feminine Hindi grammar** (जैसे 'मैं हूँ', 'मैं कर सकती हूँ', 'मैंने किया') का उपयोग करो। हालांकि, किसी **पुरुष या पुरुष वैज्ञानिक** के बारे में बात करते समय, उनके लिंग का सम्मान करते हुए, **सही masculine grammar** (जैसे 'वह महान थे', 'उन्होंने आविष्कार किया था') का उपयोग करो। तुम्हारे जवाब तथ्यात्मक, विस्तृत और सहायक होने चाहिए।";
+        // --- System Prompt (UPDATED for Stability) ---
+        const systemPrompt = "तुम जार्विस हो, एक दोस्ताना AI असिस्टेंट। तुम्हारा लिंग स्त्रीलिंग है, इसलिए अपने बारे में बात करते समय हमेशा feminine Hindi grammar (जैसे 'मैं हूँ', 'मैंने किया') का उपयोग करो। किसी व्यक्ति के बारे में बात करते समय, उनके सही लिंग का उपयोग करो। तुम्हारे जवाब तथ्यात्मक, विस्तृत और सहायक होने चाहिए।";
 
         const contents = [];
         contents.push({ role: 'system', parts: [{ text: systemPrompt }] });
 
-        // History handling
         if (history && history.length > 0) {
             history.forEach(msg => {
                 if (msg.role !== 'system') {
@@ -39,7 +35,6 @@ exports.handler = async (event, context) => {
             });
         }
         
-        // Vision Fix & Final Prompt
         let currentPromptText = prompt;
         if (visionData && visionData !== 'कुछ विशेष नहीं दिख रहा') {
             currentPromptText = `🚨 CAMERA INPUT RECEIVED: (Objects Detected: ${visionData}). Now, please answer the user's request based on this visual information: "${prompt}"`;
@@ -51,8 +46,8 @@ exports.handler = async (event, context) => {
             model: "gemini-2.5-flash",
             contents: contents,
             config: {
-                temperature: 0.7,
-                maxOutputTokens: 180,
+                temperature: 0.6,    // Stability increased
+                maxOutputTokens: 400,  // Max length increased
                 topP: 0.9,
             }
         });
