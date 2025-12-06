@@ -1,6 +1,8 @@
 // File: netlify/functions/chat-proxy.js
 
 const { GoogleGenAI } = require("@google/genai");
+
+// Netlify Environment Variable yahan se uthega
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 
 exports.handler = async (event, context) => {
@@ -12,6 +14,7 @@ exports.handler = async (event, context) => {
         const data = JSON.parse(event.body);
         const { prompt, visionData, history } = data;
 
+        // API Key ka configuration check
         if (!GEMINI_API_KEY) {
             return {
                 statusCode: 500,
@@ -21,12 +24,13 @@ exports.handler = async (event, context) => {
 
         const ai = new GoogleGenAI(GEMINI_API_KEY);
         
-        // --- System Prompt (UPDATED for Stability) ---
+        // --- System Prompt (Gender Distinction Fix) ---
         const systemPrompt = "तुम जार्विस हो, एक दोस्ताना AI असिस्टेंट। तुम्हारा लिंग स्त्रीलिंग है, इसलिए अपने बारे में बात करते समय हमेशा feminine Hindi grammar (जैसे 'मैं हूँ', 'मैंने किया') का उपयोग करो। किसी व्यक्ति के बारे में बात करते समय, उनके सही लिंग का उपयोग करो। तुम्हारे जवाब तथ्यात्मक, विस्तृत और सहायक होने चाहिए।";
 
         const contents = [];
         contents.push({ role: 'system', parts: [{ text: systemPrompt }] });
 
+        // History handling
         if (history && history.length > 0) {
             history.forEach(msg => {
                 if (msg.role !== 'system') {
@@ -35,6 +39,7 @@ exports.handler = async (event, context) => {
             });
         }
         
+        // Vision Fix & Final Prompt
         let currentPromptText = prompt;
         if (visionData && visionData !== 'कुछ विशेष नहीं दिख रहा') {
             currentPromptText = `🚨 CAMERA INPUT RECEIVED: (Objects Detected: ${visionData}). Now, please answer the user's request based on this visual information: "${prompt}"`;
@@ -49,7 +54,23 @@ exports.handler = async (event, context) => {
                 temperature: 0.6,    // Stability increased
                 maxOutputTokens: 400,  // Max length increased
                 topP: 0.9,
-            }
+            },
+            
+            // 🛑 CRITICAL FIX: SAFETY SETTINGS OVERRIDE
+            safetySettings: [
+                {
+                    category: "HARM_CATEGORY_HARASSMENT",
+                    threshold: "BLOCK_NONE" // Harassment filters ko kam kiya
+                },
+                {
+                    category: "HARM_CATEGORY_HATE_SPEECH",
+                    threshold: "BLOCK_NONE" // Hate Speech filters ko kam kiya
+                },
+                {
+                    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    threshold: "BLOCK_ONLY_HIGH" // Dangerous Content ko sirf High severity par block karo
+                }
+            ]
         });
 
         return {
