@@ -1,0 +1,7 @@
+[build]
+  # Netlify ko batao ki functions ka source folder yeh hai
+  functions = "netlify/functions"
+  # Dependencies ke liye koi build command nahi chahiye
+  command = ""
+  # Publish directory root folder hai
+  publish = ""

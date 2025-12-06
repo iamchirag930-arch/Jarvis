@@ -1,0 +1,7 @@
+# robots.txt
+# Sabhi search engines ko puri site crawl karne ki anumati den
+User-agent: *
+Allow: /
+
+# Sitemap ki location batayein
+Sitemap: https://jarvisai-assistant.netlify.app/sitemap.xml
