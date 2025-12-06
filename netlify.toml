@@ -1,7 +1,5 @@
-[build]
-  # Netlify ko batao ki functions ka source folder yeh hai
-  functions = "netlify/functions"
-  # Dependencies ke liye koi build command nahi chahiye
-  command = ""
-  # Publish directory root folder hai
-  publish = ""
+[functions]
+    # Yahan function ka folder path diya gaya hai
+    directory = "netlify/functions"
+    # Timeout 26 seconds tak badhaya gaya hai
+    timeout = 26 
